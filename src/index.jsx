@@ -54,7 +54,7 @@ QueryPosts.propTypes = {
 	query: PropTypes.object,
 	requestingPosts: PropTypes.bool,
 	requestPosts: PropTypes.func,
-	postType:PropTypes.string
+	postType: PropTypes.string
 };
 
 QueryPosts.defaultProps = {
