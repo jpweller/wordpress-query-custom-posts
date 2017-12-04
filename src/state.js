@@ -3,15 +3,16 @@
  * External dependencies
  */
 import { combineReducers } from 'redux';
-import { keyBy, reduce } from 'lodash';
+import keyBy from 'lodash/keyBy';
+import reduce from 'lodash/reduce';
 import qs from 'qs';
 import API from 'wordpress-rest-api-oauth-1';
 const api = new API( {
-	url: SiteSettings.endpoint,
+	url: SiteSettings.endpoint
 } );
 
 import {
-	getSerializedPostsQuery,
+	getSerializedPostsQuery
 } from './utils';
 
 /**
@@ -78,7 +79,7 @@ export function queryRequests( state = {}, action ) {
 		case POSTS_REQUEST_FAILURE:
 			const serializedQuery = getSerializedPostsQuery( action.query );
 			return Object.assign( {}, state, {
-				[ serializedQuery ]: POSTS_REQUEST === action.type,
+				[ serializedQuery ]: POSTS_REQUEST === action.type
 			} );
 
 		default:
@@ -99,7 +100,7 @@ export function totalPages( state = {}, action ) {
 		case POSTS_REQUEST_SUCCESS:
 			const serializedQuery = getSerializedPostsQuery( action.query );
 			return Object.assign( {}, state, {
-				[ serializedQuery ]: action.totalPages,
+				[ serializedQuery ]: action.totalPages
 			} );
 		default:
 			return state;
@@ -120,7 +121,7 @@ export function queries( state = {}, action ) {
 		case POSTS_REQUEST_SUCCESS:
 			const serializedQuery = getSerializedPostsQuery( action.query );
 			return Object.assign( {}, state, {
-				[ serializedQuery ]: action.posts.map( ( post ) => post.id ),
+				[ serializedQuery ]: action.posts.map( ( post ) => post.id )
 			} );
 		default:
 			return state;
@@ -138,7 +139,7 @@ export function slugs( state = {}, action ) {
 	switch ( action.type ) {
 		case POST_REQUEST_SUCCESS:
 			return Object.assign( {}, state, {
-				[ action.postSlug ]: action.postId,
+				[ action.postSlug ]: action.postId
 			} );
 		case POSTS_RECEIVE:
 			const posts = reduce( action.posts, ( memo, p ) => {
@@ -157,7 +158,7 @@ export default combineReducers( {
 	totalPages,
 	queryRequests,
 	queries,
-	slugs,
+	slugs
 } );
 
 /**
@@ -166,26 +167,27 @@ export default combineReducers( {
  * @param  {String}   query  Post query
  * @return {Function}        Action thunk
  */
-export function requestPosts( query = {} ) {
+export function requestPosts( postType= 'posts', query = {} ) {
 	return ( dispatch ) => {
 		dispatch( {
 			type: POSTS_REQUEST,
-			query,
+			postType,
+			query
 		} );
 
 		query._embed = true;
 
-		api.get( '/wp/v2/posts', query ).then( posts => {
+		api.get( '/wp/v2/'+ postType, query ).then( posts => {
 			dispatch( {
 				type: POSTS_RECEIVE,
-				posts,
+				posts
 			} );
-			requestPageCount( '/wp/v2/posts', query ).then( count => {
+			requestPageCount( '/wp/v2/' + postType, query ).then( count => {
 				dispatch( {
 					type: POSTS_REQUEST_SUCCESS,
 					query,
 					totalPages: count,
-					posts,
+					posts
 				} );
 			} );
 			return null;
@@ -193,7 +195,7 @@ export function requestPosts( query = {} ) {
 			dispatch( {
 				type: POSTS_REQUEST_FAILURE,
 				query,
-				error,
+				error
 			} );
 		} );
 	};
@@ -209,7 +211,7 @@ export function requestPost( postSlug ) {
 	return ( dispatch ) => {
 		dispatch( {
 			type: POST_REQUEST,
-			postSlug,
+			postSlug
 		} );
 
 		const query = {
@@ -218,22 +220,22 @@ export function requestPost( postSlug ) {
 		};
 
 		api.get( '/wp/v2/posts', query ).then( data => {
-			const post = data[ 0 ];
+			const post = data[0];
 			dispatch( {
 				type: POSTS_RECEIVE,
-				posts: [ post ],
+				posts: [ post ]
 			} );
 			dispatch( {
 				type: POST_REQUEST_SUCCESS,
 				postId: post.id,
-				postSlug,
+				postSlug
 			} );
 			return null;
 		} ).catch( ( error ) => {
 			dispatch( {
 				type: POST_REQUEST_FAILURE,
 				postSlug,
-				error,
+				error
 			} );
 		} );
 	};
@@ -241,27 +243,27 @@ export function requestPost( postSlug ) {
 
 function requestPageCount( url, data = null ) {
 	if ( url.indexOf( 'http' ) !== 0 ) {
-		url = `${ api.config.url }wp-json${ url }`;
+		url = `${api.config.url}wp-json${url}`
 	}
 
 	if ( data ) {
 		// must be decoded before being passed to ouath
-		url += `?${ decodeURIComponent( qs.stringify( data ) ) }`;
-		data = null;
+		url += `?${decodeURIComponent( qs.stringify( data ) )}`;
+		data = null
 	}
 
 	const headers = {
-		Accept: 'application/json',
-		'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+		'Accept': 'application/json',
+		'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
 	};
 
 	return fetch( url, {
 		method: 'HEAD',
 		headers: headers,
 		mode: 'cors',
-		body: null,
+		body: null
 	} )
-		.then( response => {
-			return parseInt( response.headers.get( 'X-WP-TotalPages' ), 10 ) || 1;
-		} );
+	.then( response => {
+		return parseInt( response.headers.get( 'X-WP-TotalPages' ), 10 ) || 1;
+	} );
 }

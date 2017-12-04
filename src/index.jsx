@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import { Component } from 'react';
+import { Component, PropTypes } from 'react';
+import shallowEqual from 'shallowequal';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import debugFactory from 'debug';
-import PropTypes from 'prop-types';
-import shallowEqual from 'shallowequal';
 
 /**
  * Internal dependencies
@@ -22,10 +21,9 @@ class QueryPosts extends Component {
 	}
 
 	componentWillReceiveProps( nextProps ) {
-		if (
-			this.props.postSlug === nextProps.postSlug &&
-			shallowEqual( this.props.query, nextProps.query )
-		) {
+		if ( this.props.postSlug === nextProps.postSlug &&
+				shallowEqual( this.props.query, nextProps.query ) &&
+				this.props.postType === nextProps.postType  ) {
 			return;
 		}
 
@@ -36,13 +34,13 @@ class QueryPosts extends Component {
 		const single = !! props.postSlug;
 
 		if ( ! single && ! props.requestingPosts ) {
-			debug( `Request post list using query ${ props.query }` );
-			props.requestPosts( props.query );
+			debug( `Request post list using query ${ props.query } for post type ${ props.postType }` );
+			props.requestPosts( props.postType, props.query );
 		}
 
 		if ( single && ! props.requestingPost ) {
 			debug( `Request single post ${ props.postSlug }` );
-			props.requestPost( props.postSlug );
+			props.requestPost( props.postType, props.postSlug );
 		}
 	}
 
@@ -56,27 +54,25 @@ QueryPosts.propTypes = {
 	query: PropTypes.object,
 	requestingPosts: PropTypes.bool,
 	requestPosts: PropTypes.func,
+	postType:PropTypes.string
 };
 
 QueryPosts.defaultProps = {
-	requestPosts: () => {},
+	requestPosts: () => {}
 };
 
 export default connect(
 	( state, ownProps ) => {
-		const { postSlug, query } = ownProps;
+		const { postSlug, query , postType} = ownProps;
 		return {
 			requestingPost: isRequestingPost( state, postSlug ),
-			requestingPosts: isRequestingPostsForQuery( state, query ),
+			requestingPosts: isRequestingPostsForQuery( state, query )
 		};
 	},
-	dispatch => {
-		return bindActionCreators(
-			{
-				requestPosts,
-				requestPost,
-			},
-			dispatch,
-		);
-	},
+	( dispatch ) => {
+		return bindActionCreators( {
+			requestPosts,
+			requestPost
+		}, dispatch );
+	}
 )( QueryPosts );

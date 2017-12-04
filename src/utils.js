@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { omitBy } from 'lodash';
+import omitBy from 'lodash/omitBy';
 
 const DEFAULT_POST_QUERY = {
 	_embed: true,
@@ -10,7 +10,7 @@ const DEFAULT_POST_QUERY = {
 	order_by: 'date',
 	type: 'post',
 	status: 'publish',
-	search: '',
+	search: ''
 };
 
 /**
