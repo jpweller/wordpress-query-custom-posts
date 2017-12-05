@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { Component, PropTypes } from 'react';
+import Component from 'react';
+import PropTypes from 'prop-types';
 import shallowEqual from 'shallowequal';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -23,7 +24,7 @@ class QueryPosts extends Component {
 	componentWillReceiveProps( nextProps ) {
 		if ( this.props.postSlug === nextProps.postSlug &&
 				shallowEqual( this.props.query, nextProps.query ) &&
-				this.props.postType === nextProps.postType  ) {
+				this.props.postType === nextProps.postType ) {
 			return;
 		}
 
@@ -54,25 +55,25 @@ QueryPosts.propTypes = {
 	query: PropTypes.object,
 	requestingPosts: PropTypes.bool,
 	requestPosts: PropTypes.func,
-	postType: PropTypes.string
+	postType: PropTypes.string,
 };
 
 QueryPosts.defaultProps = {
-	requestPosts: () => {}
+	requestPosts: () => {},
 };
 
 export default connect(
 	( state, ownProps ) => {
-		const { postSlug, query , postType} = ownProps;
+		const { postSlug, query } = ownProps;
 		return {
 			requestingPost: isRequestingPost( state, postSlug ),
-			requestingPosts: isRequestingPostsForQuery( state, query )
+			requestingPosts: isRequestingPostsForQuery( state, query ),
 		};
 	},
 	( dispatch ) => {
 		return bindActionCreators( {
 			requestPosts,
-			requestPost
+			requestPost,
 		}, dispatch );
 	}
 )( QueryPosts );

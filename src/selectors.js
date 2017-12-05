@@ -1,9 +1,7 @@
 /**
  * Internal dependencies
  */
-import {
-	getSerializedPostsQuery
-} from './utils';
+import getSerializedPostsQuery from './utils';
 
 /**
  * Returns a post object by its global ID.
