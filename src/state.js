@@ -2,16 +2,17 @@
 /**
  * External dependencies
  */
-import combineReducers from 'redux';
-import keyBy from 'lodash/keyBy';
-import reduce from 'lodash/reduce';
+import { combineReducers } from 'redux';
+import { keyBy, reduce } from 'lodash';
 import qs from 'qs';
 import API from 'wordpress-rest-api-oauth-1';
 const api = new API( {
 	url: SiteSettings.endpoint,
 } );
 
-import getSerializedPostsQuery from './utils';
+import {
+	getSerializedPostsQuery,
+} from './utils';
 
 /**
  * Post actions
@@ -166,7 +167,7 @@ export default combineReducers( {
  * @param  {String}   query     Post query
  * @return {Function}           Action thunk
  */
-export function requestPosts( postType = 'posts', query = {} ) {
+export function requestPosts( postType= 'posts', query = {} ) {
 	return ( dispatch ) => {
 		dispatch( {
 			type: POSTS_REQUEST,
@@ -176,12 +177,12 @@ export function requestPosts( postType = 'posts', query = {} ) {
 
 		query._embed = true;
 
-		api.get( '/wp/v2/' + postType, query ).then( posts => {
+		api.get( '/wp/v2/'+ postType, query ).then( posts => {
 			dispatch( {
 				type: POSTS_RECEIVE,
 				posts,
 			} );
-			requestPageCount( '/wp/v2/' + postType, query ).then( count => {
+			requestPageCount( '/wp/v2/'+ postType, query ).then( count => {
 				dispatch( {
 					type: POSTS_REQUEST_SUCCESS,
 					query,
@@ -206,10 +207,11 @@ export function requestPosts( postType = 'posts', query = {} ) {
  * @param  {string}   postSlug  Post slug
  * @return {Function}           Action thunk
  */
-export function requestPost( postSlug ) {
+export function requestPost( postType= 'posts', postSlug ) {
 	return ( dispatch ) => {
 		dispatch( {
 			type: POST_REQUEST,
+			postType,
 			postSlug,
 		} );
 
@@ -218,7 +220,7 @@ export function requestPost( postSlug ) {
 			_embed: true,
 		};
 
-		api.get( '/wp/v2/posts', query ).then( data => {
+		api.get( '/wp/v2/'+ postType, query ).then( data => {
 			const post = data[ 0 ];
 			dispatch( {
 				type: POSTS_RECEIVE,
@@ -256,15 +258,13 @@ function requestPageCount( url, data = null ) {
 		'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
 	};
 
-	return (
-		fetch( url, {
-			method: 'HEAD',
-			headers: headers,
-			mode: 'cors',
-			body: null,
-		} )
-			.then( response => {
-				return parseInt( response.headers.get( 'X-WP-TotalPages' ), 10 ) || 1;
-			} )
-	);
+	return fetch( url, {
+		method: 'HEAD',
+		headers: headers,
+		mode: 'cors',
+		body: null,
+	} )
+		.then( response => {
+			return parseInt( response.headers.get( 'X-WP-TotalPages' ), 10 ) || 1;
+		} );
 }

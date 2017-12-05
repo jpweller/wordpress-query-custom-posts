@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import Component from 'react';
-import PropTypes from 'prop-types';
-import shallowEqual from 'shallowequal';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import debugFactory from 'debug';
+import PropTypes from 'prop-types';
+import shallowEqual from 'shallowequal';
 
 /**
  * Internal dependencies
@@ -22,9 +22,10 @@ class QueryPosts extends Component {
 	}
 
 	componentWillReceiveProps( nextProps ) {
-		if ( this.props.postSlug === nextProps.postSlug &&
-				shallowEqual( this.props.query, nextProps.query ) &&
-				this.props.postType === nextProps.postType ) {
+		if (
+			this.props.postSlug === nextProps.postSlug &&
+			shallowEqual( this.props.query, nextProps.query )
+		) {
 			return;
 		}
 
@@ -35,7 +36,7 @@ class QueryPosts extends Component {
 		const single = !! props.postSlug;
 
 		if ( ! single && ! props.requestingPosts ) {
-			debug( `Request post list using query ${ props.query } for post type ${ props.postType }` );
+			debug( `Request post list using query ${ props.query }` );
 			props.requestPosts( props.postType, props.query );
 		}
 
@@ -55,7 +56,6 @@ QueryPosts.propTypes = {
 	query: PropTypes.object,
 	requestingPosts: PropTypes.bool,
 	requestPosts: PropTypes.func,
-	postType: PropTypes.string,
 };
 
 QueryPosts.defaultProps = {
@@ -70,10 +70,13 @@ export default connect(
 			requestingPosts: isRequestingPostsForQuery( state, query ),
 		};
 	},
-	( dispatch ) => {
-		return bindActionCreators( {
-			requestPosts,
-			requestPost,
-		}, dispatch );
-	}
+	dispatch => {
+		return bindActionCreators(
+			{
+				requestPosts,
+				requestPost,
+			},
+			dispatch,
+		);
+	},
 )( QueryPosts );
